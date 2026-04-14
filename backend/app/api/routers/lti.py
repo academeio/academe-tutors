@@ -49,7 +49,11 @@ async def oidc_login(
         raise HTTPException(400, f"Unknown platform: {iss}")
 
     state, nonce = generate_state_nonce()
-    redirect_uri = str(request.url_for("lti_launch"))
+    # Use the public-facing URL (request.url_for gives internal Railway hostname)
+    base = str(request.base_url).rstrip("/")
+    if "0.0.0.0" in base or "127.0.0.1" in base or "railway.internal" in base:
+        base = f"https://{request.headers.get('host', 'backend.tutor.ai.in')}"
+    redirect_uri = f"{base}/lti/launch"
 
     auth_url = build_auth_redirect_url(
         platform=platform,
