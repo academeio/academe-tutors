@@ -1,3 +1,5 @@
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import { ChatMessage } from "@/lib/api";
 import { StreamingMessage } from "./StreamingMessage";
 
@@ -16,10 +18,16 @@ export function MessageList({ messages }: { messages: ChatMessage[] }) {
                 : "bg-white text-slate-800 border border-slate-200"
             }`}
           >
-            {msg.streaming ? (
+            {msg.role === "user" ? (
+              <div className="whitespace-pre-wrap">{msg.content}</div>
+            ) : msg.streaming ? (
               <StreamingMessage content={msg.content} />
             ) : (
-              <div className="whitespace-pre-wrap">{msg.content}</div>
+              <div className="prose prose-sm prose-slate max-w-none">
+                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                  {msg.content}
+                </ReactMarkdown>
+              </div>
             )}
           </div>
         </div>
