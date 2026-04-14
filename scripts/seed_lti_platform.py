@@ -16,7 +16,7 @@ async def main():
             jwks_url = EXCLUDED.jwks_url,
             token_url = EXCLUDED.token_url
     """,
-        "https://sbvlms.cloudintegral.com",
+        "https://canvas.instructure.com",  # All Canvas Cloud instances use this issuer
         os.environ.get("LTI_CLIENT_ID", "FILL_AFTER_DEV_KEY_CREATED"),
         "https://sbvlms.cloudintegral.com/api/lti/authorize_redirect",
         "https://sbvlms.cloudintegral.com/api/lti/security/jwks",
