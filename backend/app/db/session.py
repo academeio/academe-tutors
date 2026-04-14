@@ -14,8 +14,10 @@ _ssl_ctx = ssl.create_default_context()
 engine = create_async_engine(
     _db_url,
     echo=False,
-    pool_size=10,
-    max_overflow=5,
+    pool_size=5,
+    max_overflow=3,
+    pool_pre_ping=True,        # Detect and replace closed connections
+    pool_recycle=300,           # Recycle connections every 5 min (Neon pooler timeout)
     connect_args={"ssl": _ssl_ctx},
 )
 
