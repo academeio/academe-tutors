@@ -20,26 +20,37 @@ async def get_platform_by_issuer(db: AsyncSession, issuer: str) -> dict | None:
 
 
 async def get_platform_jwks(db: AsyncSession, platform: dict) -> dict:
-    """Fetch and cache the platform's JWKS. Cached for 24h in lti_platforms."""
+    """Fetch and cache the platform's JWKS. Cached for 24h in lti_platforms.
+
+    Falls back to existing cache if the JWKS endpoint is unreachable (e.g. 403).
+    """
     cached_at = platform.get("jwks_cached_at")
-    if cached_at and (datetime.now(timezone.utc) - cached_at) < timedelta(hours=24):
+    has_cache = cached_at and platform.get("jwks_cache")
+
+    if has_cache and (datetime.now(timezone.utc) - cached_at) < timedelta(hours=24):
         return platform["jwks_cache"]
 
-    async with httpx.AsyncClient() as client:
-        resp = await client.get(platform["jwks_url"])
-        resp.raise_for_status()
-        jwks = resp.json()
+    try:
+        async with httpx.AsyncClient() as client:
+            resp = await client.get(platform["jwks_url"], timeout=10)
+            resp.raise_for_status()
+            jwks = resp.json()
 
-    await db.execute(
-        text("""
-            UPDATE lti_platforms
-            SET jwks_cache = cast(:jwks as jsonb), jwks_cached_at = now()
-            WHERE id = :id
-        """),
-        {"jwks": __import__("json").dumps(jwks), "id": str(platform["id"])},
-    )
-    await db.commit()
-    return jwks
+        await db.execute(
+            text("""
+                UPDATE lti_platforms
+                SET jwks_cache = cast(:jwks as jsonb), jwks_cached_at = now()
+                WHERE id = :id
+            """),
+            {"jwks": __import__("json").dumps(jwks), "id": str(platform["id"])},
+        )
+        await db.commit()
+        return jwks
+    except (httpx.HTTPStatusError, httpx.ConnectError, httpx.TimeoutException):
+        # JWKS endpoint unreachable — use stale cache if available
+        if has_cache:
+            return platform["jwks_cache"]
+        raise
 
 
 def generate_state_nonce() -> tuple[str, str]:
