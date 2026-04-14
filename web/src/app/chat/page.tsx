@@ -1,57 +1,80 @@
 "use client";
 
-/**
- * Chat page — the main tutor interface.
- * Launched via LTI with session_id and token in query params.
- *
- * TODO:
- * - Parse session_id from URL search params
- * - Establish WebSocket connection to backend
- * - Render chat UI with message history
- * - Stream tutor responses in real-time
- * - Display RAG citations inline
- * - Show competency alignment badges
- */
-export default function ChatPage() {
+import { useSearchParams } from "next/navigation";
+import { Suspense, useMemo, useEffect, useRef } from "react";
+import { useChat } from "@/hooks/useChat";
+import { MessageList } from "@/components/chat/MessageList";
+import { ChatInput } from "@/components/chat/ChatInput";
+
+function ChatContent() {
+  const searchParams = useSearchParams();
+  const token = searchParams.get("token");
+  const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const sessionId = useMemo(() => {
+    if (!token) return null;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      return payload.session_id;
+    } catch {
+      return null;
+    }
+  }, [token]);
+
+  const { messages, streaming, connected, sendMessage } = useChat(sessionId, token);
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  }, [messages]);
+
+  if (!token) {
+    return (
+      <main className="flex min-h-screen items-center justify-center">
+        <div className="text-center">
+          <h1 className="text-2xl font-bold text-slate-800">Academe Tutor</h1>
+          <p className="mt-2 text-slate-500">Please launch from Canvas LMS.</p>
+        </div>
+      </main>
+    );
+  }
+
   return (
     <main className="flex h-screen flex-col">
-      {/* Header */}
       <header className="border-b border-slate-200 bg-white px-6 py-3">
         <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-lg font-semibold text-slate-800">Academe Tutor</h1>
-            <p className="text-sm text-slate-500">Course: Loading...</p>
-          </div>
-          <div className="text-sm text-slate-400">Session placeholder</div>
+          <h1 className="text-lg font-semibold text-slate-800">Academe Tutor</h1>
+          <span className={`text-xs ${connected ? "text-green-600" : "text-red-500"}`}>
+            {connected ? "Connected" : "Disconnected"}
+          </span>
         </div>
       </header>
 
-      {/* Messages area */}
       <div className="flex-1 overflow-y-auto p-6">
         <div className="mx-auto max-w-3xl">
-          <div className="rounded-lg bg-blue-50 p-4 text-blue-800">
-            Chat interface not yet implemented. Connect via LTI launch.
-          </div>
+          {messages.length === 0 && (
+            <div className="text-center text-slate-400 mt-20">
+              <p className="text-lg">Welcome to Academe Tutor</p>
+              <p className="text-sm mt-1">Ask me anything about your course materials.</p>
+            </div>
+          )}
+          <MessageList messages={messages} />
+          <div ref={messagesEndRef} />
         </div>
       </div>
 
-      {/* Input area */}
       <div className="border-t border-slate-200 bg-white p-4">
-        <div className="mx-auto flex max-w-3xl gap-3">
-          <input
-            type="text"
-            placeholder="Ask your tutor a question..."
-            className="flex-1 rounded-lg border border-slate-300 px-4 py-2 text-sm focus:border-blue-500 focus:outline-none"
-            disabled
-          />
-          <button
-            className="rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white opacity-50"
-            disabled
-          >
-            Send
-          </button>
+        <div className="mx-auto max-w-3xl">
+          <ChatInput onSend={sendMessage} disabled={!connected || streaming} />
         </div>
       </div>
     </main>
+  );
+}
+
+export default function ChatPage() {
+  return (
+    <Suspense fallback={<div className="flex h-screen items-center justify-center">Loading...</div>}>
+      <ChatContent />
+    </Suspense>
   );
 }
