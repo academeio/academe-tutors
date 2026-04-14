@@ -136,7 +136,7 @@ async def lti_launch(
         session_id=session_id,
         user_email=claims.user_email or f"{claims.lti_user_id}@lti",
         tenant_id=platform.get("tenant_id", 1),
-        course_id=int(claims.course_id) if claims.course_id else None,
+        course_id=int(claims.course_id) if claims.course_id and claims.course_id.isdigit() else None,
         role=claims.role,
         secret=settings.secret_key,
     )
