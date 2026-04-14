@@ -72,27 +72,40 @@ Canvas LMS (SBV / Santosh)
 - No session list / sidebar
 - Santosh Developer Key not yet created
 - `tutor.academe.org.in` CNAME not configured
-- Canvas opens in iframe (should configure new-tab launch)
+- "Open in new tab" icon in chat header (keep iframe as default)
 
 ---
 
-### S2 — RAG + Knowledge Base 🔲 NOT STARTED
+### S2 — RAG + Knowledge Base + Admin 🔲 NOT STARTED
 
-**Goal:** Faculty uploads course materials, student gets grounded answers with citations.
+**Goal:** Faculty uploads course materials, student gets grounded answers with citations. Admin panel for management.
 
 | Component | Status |
 |-----------|--------|
+| **Chat persistence** | |
 | Message persistence to `tutor_messages` | 🔲 |
 | Chat history sidebar (session list) | 🔲 |
+| "Open in new tab" icon in chat header | 🔲 |
+| **Admin panel** (`/admin` in Next.js, role-gated) | |
+| RBAC middleware (admin/faculty from LTI session JWT) | 🔲 |
+| Knowledge base management UI (create, upload, delete) | 🔲 |
+| TutorBot configuration UI (per-course model, soul template) | 🔲 |
+| Session dashboard (recent activity, per-student, per-course) | 🔲 |
+| Soul template library (create, edit, assign to courses) | 🔲 |
+| **RAG pipeline** | |
 | Document parsers (PDF, DOCX, HTML, Markdown) | 🔲 |
 | Semantic chunker (heading-aware, ~500 token target) | 🔲 |
 | Embeddings: OpenAI text-embedding-3-large → pgvector | 🔲 |
 | Retrieval: cosine similarity top-k (k=5) | 🔲 |
 | Knowledge base API (CRUD + upload + capsule ingestion) | 🔲 |
+| Document upload with progress tracking (WebSocket) | 🔲 |
 | RAG context injection into system prompt | 🔲 |
 | Citation display in frontend | 🔲 |
 
-**Exit criteria:** Faculty uploads anatomy PDF → student asks question → answer cites specific pages.
+**Ported from DeepTutor (Apache 2.0):** KB CRUD patterns, TutorBot lifecycle, soul template library, upload progress tracking.
+**Built fresh:** RBAC, multi-tenant isolation, Canvas-aware context, admin UI.
+
+**Exit criteria:** Faculty uploads anatomy PDF via admin → student asks question → answer cites specific pages.
 
 ---
 
