@@ -22,17 +22,25 @@ from app.lti.session import create_session_token
 router = APIRouter()
 
 
-@router.get("/login")
+@router.api_route("/login", methods=["GET", "POST"])
 async def oidc_login(
     request: Request,
-    iss: str | None = None,
-    login_hint: str | None = None,
-    target_link_uri: str | None = None,
-    lti_message_hint: str | None = None,
-    client_id: str | None = None,
     db: AsyncSession = Depends(get_db),
 ):
-    """OIDC login initiation — Canvas redirects here first."""
+    """OIDC login initiation — Canvas sends GET or POST here."""
+    # Canvas may send params as query string (GET) or form body (POST)
+    if request.method == "POST":
+        form = await request.form()
+        params = dict(form)
+    else:
+        params = dict(request.query_params)
+
+    iss = params.get("iss")
+    login_hint = params.get("login_hint")
+    target_link_uri = params.get("target_link_uri")
+    lti_message_hint = params.get("lti_message_hint")
+    client_id = params.get("client_id")
+
     if not iss or not login_hint:
         raise HTTPException(400, "Missing iss or login_hint")
 
