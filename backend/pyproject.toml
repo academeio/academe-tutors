@@ -12,8 +12,8 @@ dependencies = [
     "websockets>=14.0",
     "python-multipart>=0.0.18",
 
-    # LTI 1.3
-    "PyLTI1p3>=2.0.0",
+    # LTI 1.3 (disabled — using manual OIDC for now)
+    # "PyLTI1p3>=2.0.0",
 
     # Database
     "asyncpg>=0.30.0",
@@ -21,24 +21,27 @@ dependencies = [
     "alembic>=1.14.0",
     "pgvector>=0.3.6",
 
-    # AI
-    "anthropic>=0.49.0",
+    # AI (via OpenRouter)
     "openai>=1.60.0",
     "tiktoken>=0.8.0",
+    # "anthropic>=0.49.0",  # disabled — using OpenRouter gateway instead
 
-    # Document parsing
-    "pymupdf>=1.25.0",         # PDF parsing
-    "python-docx>=1.1.0",      # DOCX parsing
-    "beautifulsoup4>=4.12.0",  # HTML parsing
-    "markdownify>=0.14.0",     # HTML → Markdown
+    # Document parsing (S2, but install now)
+    "pymupdf>=1.25.0",
+    "python-docx>=1.1.0",
+    "beautifulsoup4>=4.12.0",
+    "markdownify>=0.14.0",
+
+    # Auth & Security
+    "python-jose[cryptography]>=3.3.0",
+    "cryptography>=44.0.0",
+    "httpx>=0.28.0",
 
     # Utilities
     "pydantic>=2.10.0",
     "pydantic-settings>=2.7.0",
-    "python-jose[cryptography]>=3.3.0",  # JWT handling
-    "httpx>=0.28.0",
-    "tenacity>=9.0.0",         # Retry logic
-    "structlog>=24.4.0",       # Structured logging
+    "tenacity>=9.0.0",
+    "structlog>=24.4.0",
 ]
 
 [project.optional-dependencies]

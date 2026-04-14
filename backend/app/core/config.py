@@ -9,17 +9,9 @@ class Settings(BaseSettings):
     # Database
     database_url: str = "postgresql+asyncpg://localhost/academe_tutors"
 
-    # LTI 1.3
-    lti_issuer: str = "https://sbvlms.cloudintegral.com"
-    lti_client_id: str = ""
-    lti_deployment_id: str = ""
-    lti_oidc_auth_url: str = ""
-    lti_jwks_url: str = ""
-    lti_token_url: str = ""
-
-    # AI Providers
-    anthropic_api_key: str = ""
-    openai_api_key: str = ""
+    # AI (OpenRouter)
+    openrouter_api_key: str = ""
+    default_model: str = "anthropic/claude-sonnet-4-6"
 
     # Embedding
     embedding_model: str = "text-embedding-3-large"
@@ -27,7 +19,7 @@ class Settings(BaseSettings):
 
     # Application
     backend_port: int = 8001
-    frontend_port: int = 3782
+    frontend_url: str = "http://localhost:3782"
     secret_key: str = "change-me-in-production"
     allowed_origins: list[str] = ["http://localhost:3782"]
 
